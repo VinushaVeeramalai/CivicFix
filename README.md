@@ -3,7 +3,6 @@
 [![Java](https://img.shields.io/badge/Java-17-orange)](https://www.java.com)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.5-brightgreen)](https://spring.io/projects/spring-boot)
 [![MongoDB](https://img.shields.io/badge/MongoDB-7.0-green)](https://www.mongodb.com)
-[![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE)
 
 > *Empowering citizens to report, track, and resolve civic issues through AI-powered community collaboration.*
 
@@ -276,38 +275,6 @@ CivicFix/
 
 ---
 
-## 🚀 Getting Started
-
-### Prerequisites
-- Java 17+
-- Maven 3.9+
-- MongoDB 7.0 (running locally)
-
-### Installation
-
-```bash
-# 1. Clone the repository
-git clone https://github.com/VinushaVeeramalai/CivicFix.git
-cd CivicFix
-
-# 2. Start MongoDB service (Windows)
-net start MongoDB
-
-# 3. Run the application
-mvn clean spring-boot:run
-
-# 4. Open browser
-http://localhost:8080
-```
-
-### Default Admin Credentials
-```
-Email:    admin@civicfix.com
-Password: admin123
-```
-
----
-
 ## 📈 Impact & Metrics
 
 ### Target Impact
@@ -356,12 +323,6 @@ Password: admin123
 
 **Vinusha Veeramalai**
 - GitHub: [@VinushaVeeramalai](https://github.com/VinushaVeeramalai)
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License.
 
 ---
 
