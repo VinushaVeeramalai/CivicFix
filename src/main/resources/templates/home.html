@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CivicFix - Report Civic Issues</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="logo">Civic<span>Fix</span></a>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/issues">Issues</a>
+            <a href="/map">Map</a>
+            <th:block th:if="${loggedIn}">
+                <a href="/report">Report</a>
+                <a href="/profile">Profile</a>
+                <span class="points-badge" th:text="${userPoints} + ' pts'">0 pts</span>
+                <a href="/logout" class="btn-outline">Logout</a>
+            </th:block>
+            <th:block th:unless="${loggedIn}">
+                <a href="/login" class="btn-outline">Login</a>
+                <a href="/register" class="btn-primary">Register</a>
+            </th:block>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <h1>CivicFix</h1>
+        <p class="tagline">Report local issues. Get them fixed. Earn points.</p>
+        <div class="hero-cta">
+            <th:block th:if="${loggedIn}">
+                <a href="/report" class="btn-primary btn-lg">Report an Issue</a>
+            </th:block>
+            <th:block th:unless="${loggedIn}">
+                <a href="/register" class="btn-primary btn-lg">Get Started</a>
+                <a href="/login" class="btn-outline btn-lg">Login</a>
+            </th:block>
+            <a href="/map" class="btn-outline btn-lg">View Map</a>
+        </div>
+    </header>
+
+    <section class="stats-row">
+        <div class="stat-card">
+            <span class="stat-value" th:text="${totalIssues}">0</span>
+            <span class="stat-label">Total Issues</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value" th:text="${pendingCount}">0</span>
+            <span class="stat-label">Pending</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value" th:text="${inProgressCount}">0</span>
+            <span class="stat-label">In Progress</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value" th:text="${resolvedCount}">0</span>
+            <span class="stat-label">Resolved</span>
+        </div>
+        <div class="stat-card stat-critical">
+            <span class="stat-value" th:text="${criticalCount}">0</span>
+            <span class="stat-label">Critical</span>
+        </div>
+    </section>
+
+    <section class="how-it-works">
+        <h2>How It Works</h2>
+        <div class="cards-row">
+            <div class="card">
+                <div class="card-icon">📝</div>
+                <h3>Report</h3>
+                <p>Spot a pothole, broken streetlight, or any civic issue? Report it with a photo and location. +10 points.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">👍</div>
+                <h3>Upvote</h3>
+                <p>Support issues that matter. Upvoting helps prioritize fixes and earns you +2 points per upvote.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">🏆</div>
+                <h3>Earn Points</h3>
+                <p>Climb the leaderboard. Top contributors get recognition in the community.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="recent-issues">
+        <h2>Recent Issues (by upvotes)</h2>
+        <div class="issues-grid" th:if="${#lists.size(recentIssues) > 0}">
+            <div class="issue-card" th:each="issue : ${recentIssues}">
+                <div class="issue-image" th:if="${issue.imagePath}">
+                    <img th:src="${issue.imagePath}" alt="Issue">
+                </div>
+                <div class="issue-image placeholder" th:unless="${issue.imagePath}">📍</div>
+                <div class="issue-body">
+                    <h3 th:text="${issue.title}">Title</h3>
+                    <span class="badge severity" th:classappend="'severity-' + ${#strings.replace(#strings.toLowerCase(issue.severity), ' ', '-')}" th:text="${issue.severity}">Medium</span>
+                    <span class="issue-location" th:text="${issue.location}">Location</span>
+                    <span class="issue-category" th:text="${issue.category}">Category</span>
+                    <p class="issue-desc" th:text="${#strings.abbreviate(issue.description, 80)}">Description</p>
+                    <span class="badge status" th:classappend="'status-' + ${#strings.replace(#strings.toLowerCase(issue.status), ' ', '-')}" th:text="${issue.status}">Pending</span>
+                    <div class="issue-actions">
+                        <button type="button" class="btn-upvote" th:data-id="${issue.id}" th:attr="data-voted=${userId != null && issue.upvotedBy != null && #lists.contains(issue.upvotedBy, userId)}">
+                            👍 <span th:text="${issue.upvotes}">0</span>
+                        </button>
+                        <a th:href="@{/issues}" class="btn-link">View all</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <p class="empty-state" th:if="${#lists.isEmpty(recentIssues)}">No issues reported yet. Be the first to report one!</p>
+    </section>
+
+    <script th:src="@{/js/main.js}"></script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - CivicFix</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="logo">Civic<span>Fix</span></a>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/issues">Issues</a>
+            <a href="/map">Map</a>
+            <a href="/admin" class="active">Admin</a>
+            <a href="/profile">Profile</a>
+            <a href="/logout" class="btn-outline">Logout</a>
+        </div>
+    </nav>
+
+    <main class="admin-page">
+        <h1>Admin Dashboard</h1>
+        <div class="alert alert-success" th:if="${success}" th:text="${success}">Success</div>
+        <div class="alert alert-error" th:if="${error}" th:text="${error}">Error</div>
+
+        <section class="stats-row">
+            <div class="stat-card">
+                <span class="stat-value" th:text="${totalIssues}">0</span>
+                <span class="stat-label">Total</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value" th:text="${pendingCount}">0</span>
+                <span class="stat-label">Pending</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value" th:text="${inProgressCount}">0</span>
+                <span class="stat-label">In Progress</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value" th:text="${resolvedCount}">0</span>
+                <span class="stat-label">Resolved</span>
+            </div>
+            <div class="stat-card stat-critical">
+                <span class="stat-value" th:text="${criticalCount}">0</span>
+                <span class="stat-label">Critical</span>
+            </div>
+        </section>
+
+        <div class="admin-tabs">
+            <input type="radio" name="adminTab" id="tabIssues" checked>
+            <input type="radio" name="adminTab" id="tabLeaderboard">
+            <div class="tab-labels">
+                <label for="tabIssues">Issues</label>
+                <label for="tabLeaderboard">Leaderboard</label>
+            </div>
+            <div class="tab-panels">
+                <div class="tab-panel" id="panelIssues">
+                    <div class="table-wrap">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Category</th>
+                                    <th>Location</th>
+                                    <th>Reporter</th>
+                                    <th>Severity</th>
+                                    <th>Upvotes</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="issue : ${allIssues}">
+                                    <td th:text="${issue.title}">Title</td>
+                                    <td th:text="${issue.category}">Category</td>
+                                    <td th:text="${#strings.abbreviate(issue.location, 25)}">Location</td>
+                                    <td th:text="${issue.reporterName}">Reporter</td>
+                                    <td><span class="badge severity" th:classappend="'severity-' + ${#strings.replace(#strings.toLowerCase(issue.severity), ' ', '-')}" th:text="${issue.severity}">-</span></td>
+                                    <td th:text="${issue.upvotes}">0</td>
+                                    <td><span class="badge status" th:classappend="'status-' + ${#strings.replace(#strings.toLowerCase(issue.status), ' ', '-')}" th:text="${issue.status}">-</span></td>
+                                    <td>
+                                        <form th:action="@{/admin/update/{id}(id=${issue.id})}" method="post" class="admin-action-form">
+                                            <select name="status" class="admin-select">
+                                                <option value="Pending" th:selected="${issue.status == 'Pending'}">Pending</option>
+                                                <option value="In Progress" th:selected="${issue.status == 'In Progress'}">In Progress</option>
+                                                <option value="Resolved" th:selected="${issue.status == 'Resolved'}">Resolved</option>
+                                            </select>
+                                            <select name="severity" class="admin-select">
+                                                <option value="Low" th:selected="${issue.severity == 'Low'}">Low</option>
+                                                <option value="Medium" th:selected="${issue.severity == 'Medium'}">Medium</option>
+                                                <option value="High" th:selected="${issue.severity == 'High'}">High</option>
+                                                <option value="Critical" th:selected="${issue.severity == 'Critical'}">Critical</option>
+                                            </select>
+                                            <button type="submit" class="btn-primary btn-sm">Save</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-panel" id="panelLeaderboard">
+                    <div class="leaderboard">
+                        <div class="leaderboard-item" th:each="user, iterStat : ${leaderboard}">
+                            <span class="rank" th:classappend="${iterStat.index == 0} ? 'gold' : (${iterStat.index == 1} ? 'silver' : (${iterStat.index == 2} ? 'bronze' : ''))">
+                                    <th:block th:if="${iterStat.index == 0}">🥇</th:block>
+                                    <th:block th:if="${iterStat.index == 1}">🥈</th:block>
+                                    <th:block th:if="${iterStat.index == 2}">🥉</th:block>
+                                    <th:block th:if="${iterStat.index > 2}" th:text="${iterStat.index + 1}">4</th:block>
+                                </span>
+                            <span class="leader-name" th:text="${user.name}">Name</span>
+                            <span class="leader-email" th:text="${user.email}">email</span>
+                            <span class="points-badge" th:text="${user.points} + ' pts'">0 pts</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script th:src="@{/js/main.js}"></script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map - CivicFix</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHnpRCamVE1Je4ilP+i5ROXNyQUc=" crossorigin="">
+</head>
+<body class="map-page">
+    <nav class="navbar">
+        <a href="/" class="logo">Civic<span>Fix</span></a>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/issues">Issues</a>
+            <a href="/map" class="active">Map</a>
+            <th:block th:if="${loggedIn}">
+                <a href="/report">Report</a>
+                <a href="/profile">Profile</a>
+                <span class="points-badge" th:text="${userPoints} + ' pts'">0 pts</span>
+                <a href="/logout" class="btn-outline">Logout</a>
+            </th:block>
+            <th:block th:unless="${loggedIn}">
+                <a href="/login" class="btn-outline">Login</a>
+                <a href="/register" class="btn-primary">Register</a>
+            </th:block>
+        </div>
+    </nav>
+
+    <div class="map-legend">
+        <span class="legend-item"><span class="dot critical"></span> Critical</span>
+        <span class="legend-item"><span class="dot high"></span> High</span>
+        <span class="legend-item"><span class="dot medium"></span> Medium</span>
+        <span class="legend-item"><span class="dot low"></span> Low</span>
+        <span class="legend-item"><span class="dot resolved"></span> Resolved</span>
+    </div>
+
+    <div class="map-wrapper">
+        <div id="map" class="map-container"></div>
+    </div>
+
+    <div class="map-stats">
+        <span>Total issues on map: <strong id="mapIssueCount">0</strong></span>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script th:src="@{/js/main.js}"></script>
+    <script>
+        (function() {
+            function runMap() {
+                if (typeof L === 'undefined') {
+                    var el = document.getElementById('map');
+                    if (el) el.innerHTML = '<p style="padding:2rem;color:#94a3b8;">Map failed to load. Check your connection.</p>';
+                    return;
+                }
+                var mapEl = document.getElementById('map');
+                var wrapper = document.querySelector('.map-wrapper');
+                if (!mapEl || !wrapper) return;
+
+                var navH = document.querySelector('.navbar') ? document.querySelector('.navbar').offsetHeight : 56;
+                var legendH = document.querySelector('.map-legend') ? document.querySelector('.map-legend').offsetHeight : 44;
+                var statsH = document.querySelector('.map-stats') ? document.querySelector('.map-stats').offsetHeight : 36;
+                var mapTop = navH + legendH;
+                var mapH = window.innerHeight - mapTop - statsH;
+                var mapW = window.innerWidth;
+                wrapper.style.top = mapTop + 'px';
+                wrapper.style.bottom = statsH + 'px';
+                wrapper.style.left = '0';
+                wrapper.style.right = '0';
+                wrapper.style.width = mapW + 'px';
+                wrapper.style.height = mapH + 'px';
+                mapEl.style.width = mapW + 'px';
+                mapEl.style.height = mapH + 'px';
+
+                var CENTER = [11.0168, 76.9558];
+                var map = L.map('map', { zoomControl: true }).setView(CENTER, 13);
+
+                var tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                }).addTo(map);
+
+                var colors = { 'Critical': '#dc2626', 'High': '#ea580c', 'Medium': '#f59e0b', 'Low': '#10b981', 'Resolved': '#6366f1' };
+                function getColor(severity, status) {
+                    return status === 'Resolved' ? colors['Resolved'] : (colors[severity] || colors['Medium']);
+                }
+
+                fetch('/api/issues')
+                    .then(function(r) { return r.ok ? r.json() : []; })
+                    .then(function(issues) {
+                        if (!Array.isArray(issues)) issues = [];
+                        var countEl = document.getElementById('mapIssueCount');
+                        if (countEl) countEl.textContent = issues.length;
+                        issues.forEach(function(issue) {
+                            var lat = Number(issue.latitude) || CENTER[0];
+                            var lng = Number(issue.longitude) || CENTER[1];
+                            var marker = L.circleMarker([lat, lng], {
+                                radius: 8, fillColor: getColor(issue.severity, issue.status), color: '#fff',
+                                weight: 1, opacity: 1, fillOpacity: 0.9
+                            }).addTo(map);
+                            marker.bindPopup(
+                                '<strong>' + (issue.title || 'Issue') + '</strong><br>Category: ' + (issue.category || '-') + '<br>Severity: ' + (issue.severity || '-') + '<br>Status: ' + (issue.status || '-') + '<br>Location: ' + (issue.location || '-') + '<br>Upvotes: ' + (issue.upvotes || 0)
+                            );
+                        });
+                    })
+                    .catch(function() {
+                        var countEl = document.getElementById('mapIssueCount');
+                        if (countEl) countEl.textContent = '0';
+                    });
+
+                function refreshMapSize() {
+                    var navH = document.querySelector('.navbar') ? document.querySelector('.navbar').offsetHeight : 56;
+                    var legendH = document.querySelector('.map-legend') ? document.querySelector('.map-legend').offsetHeight : 44;
+                    var statsH = document.querySelector('.map-stats') ? document.querySelector('.map-stats').offsetHeight : 36;
+                    var mapTop = navH + legendH;
+                    var mapH = window.innerHeight - mapTop - statsH;
+                    var mapW = window.innerWidth;
+                    wrapper.style.top = mapTop + 'px';
+                    wrapper.style.bottom = statsH + 'px';
+                    wrapper.style.width = mapW + 'px';
+                    wrapper.style.height = mapH + 'px';
+                    mapEl.style.width = mapW + 'px';
+                    mapEl.style.height = mapH + 'px';
+                    map.invalidateSize();
+                }
+                setTimeout(refreshMapSize, 350);
+                setTimeout(refreshMapSize, 800);
+                window.addEventListener('resize', refreshMapSize);
+            }
+
+            if (document.readyState === 'complete') {
+                setTimeout(runMap, 150);
+            } else {
+                window.addEventListener('load', function() { setTimeout(runMap, 150); });
+            }
+        })();
+    </script>
+</body>
+</html>

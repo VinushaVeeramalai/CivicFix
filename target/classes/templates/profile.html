@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - CivicFix</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="logo">Civic<span>Fix</span></a>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/issues">Issues</a>
+            <a href="/map">Map</a>
+            <a href="/report">Report</a>
+            <a href="/profile" class="active">Profile</a>
+            <span class="points-badge" th:text="${user.points} + ' pts'">0 pts</span>
+            <a href="/logout" class="btn-outline">Logout</a>
+        </div>
+    </nav>
+
+    <main class="profile-page">
+        <header class="profile-header">
+            <div class="avatar" th:text="${#strings.substring(user.name, 0, 1)}">U</div>
+            <h1 th:text="${user.name}">Name</h1>
+            <p class="profile-email" th:text="${user.email}">email</p>
+            <span class="points-badge large" th:text="${user.points} + ' points'">0 points</span>
+        </header>
+        <section class="profile-card">
+            <h2>Points earning guide</h2>
+            <ul>
+                <li>Report an issue: <strong>+10 points</strong></li>
+                <li>Upvote an issue: <strong>+2 points</strong></li>
+                <li>Climb the leaderboard (visible in Admin dashboard)</li>
+            </ul>
+            <a href="/report" class="btn-primary">Report an Issue</a>
+        </section>
+    </main>
+
+    <script th:src="@{/js/main.js}"></script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Issues - CivicFix</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="logo">Civic<span>Fix</span></a>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/issues">Issues</a>
+            <a href="/map">Map</a>
+            <th:block th:if="${loggedIn}">
+                <a href="/report">Report</a>
+                <a href="/profile">Profile</a>
+                <span class="points-badge" th:text="${userPoints} + ' pts'">0 pts</span>
+                <a href="/logout" class="btn-outline">Logout</a>
+            </th:block>
+            <th:block th:unless="${loggedIn}">
+                <a href="/login" class="btn-outline">Login</a>
+                <a href="/register" class="btn-primary">Register</a>
+            </th:block>
+        </div>
+    </nav>
+
+    <main class="issues-page">
+        <h1>All Issues</h1>
+        <div class="filter-bar">
+            <span class="filter-label">Filter by:</span>
+            <a th:href="@{/issues}" class="filter-chip" th:classappend="${filterStatus == null && filterCategory == null && filterSeverity == null} ? 'active' : ''">All</a>
+            <span class="filter-group">Status:</span>
+            <a th:href="@{/issues(status='Pending')}" class="filter-chip" th:classappend="${filterStatus == 'Pending'} ? 'active' : ''">Pending</a>
+            <a th:href="@{/issues(status='In Progress')}" class="filter-chip" th:classappend="${filterStatus == 'In Progress'} ? 'active' : ''">In Progress</a>
+            <a th:href="@{/issues(status='Resolved')}" class="filter-chip" th:classappend="${filterStatus == 'Resolved'} ? 'active' : ''">Resolved</a>
+            <span class="filter-group">Severity:</span>
+            <a th:href="@{/issues(severity='Critical')}" class="filter-chip" th:classappend="${filterSeverity == 'Critical'} ? 'active' : ''">Critical</a>
+            <a th:href="@{/issues(severity='High')}" class="filter-chip" th:classappend="${filterSeverity == 'High'} ? 'active' : ''">High</a>
+            <a th:href="@{/issues(severity='Medium')}" class="filter-chip" th:classappend="${filterSeverity == 'Medium'} ? 'active' : ''">Medium</a>
+            <a th:href="@{/issues(severity='Low')}" class="filter-chip" th:classappend="${filterSeverity == 'Low'} ? 'active' : ''">Low</a>
+            <span class="filter-group">Category:</span>
+            <a th:href="@{/issues(category='Pothole')}" class="filter-chip" th:classappend="${filterCategory == 'Pothole'} ? 'active' : ''">Pothole</a>
+            <a th:href="@{/issues(category='Water Leak')}" class="filter-chip" th:classappend="${filterCategory == 'Water Leak'} ? 'active' : ''">Water Leak</a>
+            <a th:href="@{/issues(category='Streetlight')}" class="filter-chip" th:classappend="${filterCategory == 'Streetlight'} ? 'active' : ''">Streetlight</a>
+            <a th:href="@{/issues(category='Garbage')}" class="filter-chip" th:classappend="${filterCategory == 'Garbage'} ? 'active' : ''">Garbage</a>
+            <a th:href="@{/issues(category='Other')}" class="filter-chip" th:classappend="${filterCategory == 'Other'} ? 'active' : ''">Other</a>
+        </div>
+
+        <div class="issues-grid" th:if="${#lists.size(issues) > 0}">
+            <div class="issue-card" th:each="issue : ${issues}">
+                <div class="issue-image" th:if="${issue.imagePath}">
+                    <img th:src="${issue.imagePath}" alt="Issue">
+                </div>
+                <div class="issue-image placeholder" th:unless="${issue.imagePath}">📍</div>
+                <div class="issue-body">
+                    <h3 th:text="${issue.title}">Title</h3>
+                    <span class="badge severity" th:classappend="'severity-' + ${#strings.replace(#strings.toLowerCase(issue.severity), ' ', '-')}" th:text="${issue.severity}">Medium</span>
+                    <span class="issue-location" th:text="${issue.location}">Location</span>
+                    <span class="issue-category" th:text="${issue.category}">Category</span>
+                    <p class="issue-desc" th:text="${#strings.abbreviate(issue.description, 100)}">Description</p>
+                    <span class="badge status" th:classappend="'status-' + ${#strings.replace(#strings.toLowerCase(issue.status), ' ', '-')}" th:text="${issue.status}">Pending</span>
+                    <div class="issue-actions">
+                        <button type="button" class="btn-upvote" th:data-id="${issue.id}" th:attr="data-voted=${#lists.contains(issue.upvotedBy, userId)}">
+                            👍 <span class="upvote-count" th:text="${issue.upvotes}">0</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <p class="empty-state" th:if="${#lists.isEmpty(issues)}">No issues match your filters. <a href="/report">Report one</a>?</p>
+    </main>
+
+    <script th:src="@{/js/main.js}"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+com\civicfix\service\SeverityService.class
+com\civicfix\controller\IssueController.class
+com\civicfix\model\User.class
+com\civicfix\repository\IssueRepository.class
+com\civicfix\controller\AuthController.class
+com\civicfix\repository\UserRepository.class
+com\civicfix\model\Issue.class
+com\civicfix\config\WebConfig.class
+com\civicfix\CivicFixApplication.class
